@@ -1,152 +1,209 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>FoxTrix</title>
+  <meta charset="UTF-8">
+  <title>Форма планёрки</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ адаптация -->
   <style>
-    html, body {
-      height: 100%;
+    body {
+      font-family: "Segoe UI", Roboto, sans-serif;
       margin: 0;
       padding: 0;
-      font-family: 'Montserrat', sans-serif;
-      color: #fff;
-      background-color: #0b1b27;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      box-sizing: border-box;
+      background: #f4f6f9;
+      color: #333;
     }
-
-    /* Основные контейнеры */
-    .container {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      align-items: center;
-      width: 100%;
-      min-height: 100vh;
-      padding: 24px;
-      box-sizing: border-box;
-    }
-
-    h2 {
-      font-size: 60px;
-      margin: 20px 0;
-      color: #ff5c00;
-      text-shadow: 0 0 6px #ff5c00;
-      text-align: center;
-    }
-
-    .mode-name {
-      font-size: 20px;
-      margin-bottom: 20px;
-      color: #ffffff;
-      text-shadow: 0 0 6px #ff5c00;
-      text-align: center;
-    }
-
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      box-sizing: border-box;
-    }
-
-    input {
-      background: rgba(46, 46, 62, 0.6);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    button {
-      background: rgba(255, 92, 0, 0.35);
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-
-    button:active {
-      background: rgba(255, 92, 0, 1);
-      transform: scale(0.97);
-    }
-
-    /* Кастомный алерт */
-    #custom-alert {
-      display: none;
+    header {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 92, 0, 0.85);
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #4CAF50;
       color: white;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 14px;
-      z-index: 1000;
       text-align: center;
-      font-weight: 600;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      z-index: 1000;
     }
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; transform: translate(-50%, -60%); }
-      10%, 90% { opacity: 1; transform: translate(-50%, -50%); }
-      100% { opacity: 0; transform: translate(-50%, -40%); }
+    nav {
+      position: fixed;
+      top: 52px;
+      left: 0;
+      right: 0;
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      z-index: 999;
+    }
+    nav button {
+      flex: 1;
+      padding: 12px 6px;
+      border: none;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    nav button.active {
+      border-bottom: 3px solid #4CAF50;
+      color: #4CAF50;
+    }
+    .container {
+      padding: 120px 15px 20px; /* ✅ учёт фиксированного header + nav */
+      max-width: 600px;
+      margin: auto;
+    }
+    form {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    form.active {
+      display: block;
+    }
+    h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 70px;
+      margin-bottom: 12px;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      resize: vertical;
+      background: #fff;
+      box-sizing: border-box;
+    }
+    button.submit {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button.submit:hover {
+      background: #45a049;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
+  <header>Форма планёрки</header>
+
+  <nav>
+    <button id="tab-week" class="active">План</button>
+    <button id="tab-day">Сводка</button>
+    <button id="tab-report">Отчёт</button>
+  </nav>
+
   <div class="container">
-    <h2>FoxTrix</h2>
-    <div class="mode-name" id="mode-name"></div>
+    <!-- 📅 План недели -->
+    <form id="form-week" class="active">
+      <h3>План на неделю</h3>
+      <textarea id="week-plan" placeholder="1–3 главные задачи"></textarea>
+      <textarea id="week-important" placeholder="Что самое важное"></textarea>
+      <button type="submit" class="submit">Отправить</button>
+    </form>
 
-    <!-- Пример формы -->
-    <input type="text" id="query" placeholder="Поисковый запрос" />
-    <input type="number" id="count" placeholder="Повторы" min="1" max="1000" />
-    <button id="run-btn">Запустить FoxTrick</button>
+    <!-- 📋 Сводка дня -->
+    <form id="form-day">
+      <h3>Сводка дня</h3>
+      <textarea id="day-did" placeholder="Что сделал вчера"></textarea>
+      <textarea id="day-didnt" placeholder="Что не сделал и почему"></textarea>
+      <textarea id="day-blockers" placeholder="Какие препятствия"></textarea>
+      <textarea id="day-insights" placeholder="Какие инсайты"></textarea>
+      <textarea id="day-today" placeholder="План на сегодня (1–2 задачи)"></textarea>
+      <button type="submit" class="submit">Отправить</button>
+    </form>
+
+    <!-- 📊 Отчёт недели -->
+    <form id="form-report">
+      <h3>Отчёт недели</h3>
+      <textarea id="report-planned" placeholder="Какой был план"></textarea>
+      <textarea id="report-done" placeholder="Что сделал"></textarea>
+      <textarea id="report-notdone" placeholder="Что не сделал и почему"></textarea>
+      <textarea id="report-blockers" placeholder="Какие препятствия"></textarea>
+      <textarea id="report-insights" placeholder="Какие главные инсайты"></textarea>
+      <textarea id="report-next" placeholder="План на следующую неделю"></textarea>
+      <button type="submit" class="submit">Отправить</button>
+    </form>
   </div>
-
-  <div id="custom-alert"></div>
 
   <script>
     const tg = window.Telegram.WebApp;
-    window.addEventListener("DOMContentLoaded", () => {
-      tg.ready();
-      tg.expand();
+
+    // Переключение вкладок
+    const tabs = {
+      "tab-week": "form-week",
+      "tab-day": "form-day",
+      "tab-report": "form-report"
+    };
+
+    Object.keys(tabs).forEach(tabId => {
+      document.getElementById(tabId).addEventListener("click", () => {
+        document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+        document.getElementById(tabId).classList.add("active");
+
+        document.querySelectorAll("form").forEach(f => f.classList.remove("active"));
+        document.getElementById(tabs[tabId]).classList.add("active");
+      });
     });
 
-    document.getElementById("run-btn").addEventListener("click", () => {
-      const query = document.getElementById("query").value.trim();
-      const count = parseInt(document.getElementById("count").value);
-
-      if (!query || isNaN(count) || count < 1) {
-        showAlert("Введите корректные данные");
-        return;
-      }
-
-      const payload = {
-        query: query,
-        count: count
-      };
-
-      tg.sendData(JSON.stringify(payload));
-      showAlert("Параметры отправлены! Вернись в бот и запусти FoxTrick.");
-    });
-
-    function showAlert(message) {
-      const alertBox = document.getElementById("custom-alert");
-      alertBox.innerHTML = message;
-      alertBox.style.display = "block";
-      alertBox.style.animation = "fadeInOut 3s forwards";
-      setTimeout(() => alertBox.style.display = "none", 3000);
+    function sendForm(formName, fields) {
+      const data = { form: formName, ...fields };
+      tg.sendData(JSON.stringify(data));
+      tg.close();
     }
+
+    // 📅 План недели
+    document.getElementById("form-week").addEventListener("submit", e => {
+      e.preventDefault();
+      sendForm("План недели", {
+        plan: document.getElementById("week-plan").value,
+        important: document.getElementById("week-important").value
+      });
+    });
+
+    // 📋 Сводка дня
+    document.getElementById("form-day").addEventListener("submit", e => {
+      e.preventDefault();
+      sendForm("Сводка дня", {
+        did: document.getElementById("day-did").value,
+        didnt: document.getElementById("day-didnt").value,
+        blockers: document.getElementById("day-blockers").value,
+        insights: document.getElementById("day-insights").value,
+        today: document.getElementById("day-today").value
+      });
+    });
+
+    // 📊 Отчёт недели
+    document.getElementById("form-report").addEventListener("submit", e => {
+      e.preventDefault();
+      sendForm("Отчёт недели", {
+        planned: document.getElementById("report-planned").value,
+        done: document.getElementById("report-done").value,
+        notdone: document.getElementById("report-notdone").value,
+        blockers: document.getElementById("report-blockers").value,
+        insights: document.getElementById("report-insights").value,
+        next: document.getElementById("report-next").value
+      });
+    });
+
+    tg.ready();
   </script>
 </body>
 </html>
