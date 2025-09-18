@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Форма планёрки</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ адаптация -->
   <style>
     body {
       font-family: "Segoe UI", Roboto, sans-serif;
@@ -13,36 +14,49 @@
       color: #333;
     }
     header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
       background: #4CAF50;
       color: white;
       text-align: center;
-      padding: 15px;
-      font-size: 20px;
+      padding: 14px;
+      font-size: 18px;
       font-weight: bold;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
+      z-index: 1000;
     }
     nav {
+      position: fixed;
+      top: 52px;
+      left: 0;
+      right: 0;
       display: flex;
       background: #fff;
       border-bottom: 1px solid #ddd;
+      z-index: 999;
     }
     nav button {
       flex: 1;
-      padding: 12px;
+      padding: 12px 6px;
       border: none;
       background: #fff;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       border-bottom: 3px solid transparent;
       transition: all 0.3s ease;
+      white-space: nowrap;
     }
     nav button.active {
       border-bottom: 3px solid #4CAF50;
       color: #4CAF50;
     }
     .container {
-      padding: 20px;
+      padding: 120px 15px 20px; /* ✅ учёт фиксированного header + nav */
+      max-width: 600px;
+      margin: auto;
     }
     form {
       display: none;
@@ -51,24 +65,30 @@
     form.active {
       display: block;
     }
+    h3 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
     textarea {
       width: 100%;
-      min-height: 60px;
-      margin-bottom: 15px;
+      min-height: 70px;
+      margin-bottom: 12px;
       padding: 12px;
       font-size: 15px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 8px;
       resize: vertical;
+      background: #fff;
+      box-sizing: border-box;
     }
     button.submit {
       width: 100%;
-      padding: 14px;
+      padding: 16px;
       font-size: 16px;
       background: #4CAF50;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
@@ -85,9 +105,9 @@
   <header>Форма планёрки</header>
 
   <nav>
-    <button id="tab-week" class="active">План недели</button>
-    <button id="tab-day">Сводка дня</button>
-    <button id="tab-report">Отчёт недели</button>
+    <button id="tab-week" class="active">План</button>
+    <button id="tab-day">Сводка</button>
+    <button id="tab-report">Отчёт</button>
   </nav>
 
   <div class="container">
@@ -135,22 +155,16 @@
 
     Object.keys(tabs).forEach(tabId => {
       document.getElementById(tabId).addEventListener("click", () => {
-        // Активная кнопка
         document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
         document.getElementById(tabId).classList.add("active");
 
-        // Активная форма
         document.querySelectorAll("form").forEach(f => f.classList.remove("active"));
         document.getElementById(tabs[tabId]).classList.add("active");
       });
     });
 
-    // Универсальная функция отправки
     function sendForm(formName, fields) {
-      const data = {
-        form: formName,
-        ...fields
-      };
+      const data = { form: formName, ...fields };
       tg.sendData(JSON.stringify(data));
       tg.close();
     }
