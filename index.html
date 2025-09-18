@@ -6,53 +6,187 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #f9f9f9;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f9;
+      color: #333;
     }
-    h2 {
-      margin-bottom: 15px;
+    header {
+      background: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 1px;
     }
-    textarea, button {
-      display: block;
-      width: 100%;
-      margin-bottom: 15px;
-      padding: 10px;
+    nav {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+    }
+    nav button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: #fff;
+      cursor: pointer;
       font-size: 16px;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    nav button.active {
+      border-bottom: 3px solid #4CAF50;
+      color: #4CAF50;
+    }
+    .container {
+      padding: 20px;
+    }
+    form {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    form.active {
+      display: block;
+    }
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      margin-bottom: 15px;
+      padding: 12px;
+      font-size: 15px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      resize: vertical;
     }
-    button {
+    button.submit {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
       background: #4CAF50;
       color: white;
       border: none;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background 0.3s ease;
     }
-    button:hover {
+    button.submit:hover {
       background: #45a049;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <h2>План на неделю</h2>
-  <form id="planForm">
-    <textarea id="plan" placeholder="1–3 главные задачи"></textarea>
-    <textarea id="important" placeholder="Что самое важное"></textarea>
-    <button type="submit">Отправить</button>
-  </form>
+  <header>Форма планёрки</header>
+
+  <nav>
+    <button id="tab-week" class="active">План недели</button>
+    <button id="tab-day">Сводка дня</button>
+    <button id="tab-report">Отчёт недели</button>
+  </nav>
+
+  <div class="container">
+    <!-- 📅 План недели -->
+    <form id="form-week" class="active">
+      <h3>План на неделю</h3>
+      <textarea id="week-plan" placeholder="1–3 главные задачи"></textarea>
+      <textarea id="week-important" placeholder="Что самое важное"></textarea>
+      <button type="submit" class="submit">Отправить</button>
+    </form>
+
+    <!-- 📋 Сводка дня -->
+    <form id="form-day">
+      <h3>Сводка дня</h3>
+      <textarea id="day-did" placeholder="Что сделал вчера"></textarea>
+      <textarea id="day-didnt" placeholder="Что не сделал и почему"></textarea>
+      <textarea id="day-blockers" placeholder="Какие препятствия"></textarea>
+      <textarea id="day-insights" placeholder="Какие инсайты"></textarea>
+      <textarea id="day-today" placeholder="План на сегодня (1–2 задачи)"></textarea>
+      <button type="submit" class="submit">Отправить</button>
+    </form>
+
+    <!-- 📊 Отчёт недели -->
+    <form id="form-report">
+      <h3>Отчёт недели</h3>
+      <textarea id="report-planned" placeholder="Какой был план"></textarea>
+      <textarea id="report-done" placeholder="Что сделал"></textarea>
+      <textarea id="report-notdone" placeholder="Что не сделал и почему"></textarea>
+      <textarea id="report-blockers" placeholder="Какие препятствия"></textarea>
+      <textarea id="report-insights" placeholder="Какие главные инсайты"></textarea>
+      <textarea id="report-next" placeholder="План на следующую неделю"></textarea>
+      <button type="submit" class="submit">Отправить</button>
+    </form>
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
 
-    document.getElementById("planForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+    // Переключение вкладок
+    const tabs = {
+      "tab-week": "form-week",
+      "tab-day": "form-day",
+      "tab-report": "form-report"
+    };
+
+    Object.keys(tabs).forEach(tabId => {
+      document.getElementById(tabId).addEventListener("click", () => {
+        // Активная кнопка
+        document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+        document.getElementById(tabId).classList.add("active");
+
+        // Активная форма
+        document.querySelectorAll("form").forEach(f => f.classList.remove("active"));
+        document.getElementById(tabs[tabId]).classList.add("active");
+      });
+    });
+
+    // Универсальная функция отправки
+    function sendForm(formName, fields) {
       const data = {
-        form: "План недели",   // важно для Google Script
-        plan: document.getElementById("plan").value,
-        important: document.getElementById("important").value
+        form: formName,
+        ...fields
       };
-      tg.sendData(JSON.stringify(data)); // отправка в бота
-      tg.close(); // закрыть WebApp после отправки
+      tg.sendData(JSON.stringify(data));
+      tg.close();
+    }
+
+    // 📅 План недели
+    document.getElementById("form-week").addEventListener("submit", e => {
+      e.preventDefault();
+      sendForm("План недели", {
+        plan: document.getElementById("week-plan").value,
+        important: document.getElementById("week-important").value
+      });
+    });
+
+    // 📋 Сводка дня
+    document.getElementById("form-day").addEventListener("submit", e => {
+      e.preventDefault();
+      sendForm("Сводка дня", {
+        did: document.getElementById("day-did").value,
+        didnt: document.getElementById("day-didnt").value,
+        blockers: document.getElementById("day-blockers").value,
+        insights: document.getElementById("day-insights").value,
+        today: document.getElementById("day-today").value
+      });
+    });
+
+    // 📊 Отчёт недели
+    document.getElementById("form-report").addEventListener("submit", e => {
+      e.preventDefault();
+      sendForm("Отчёт недели", {
+        planned: document.getElementById("report-planned").value,
+        done: document.getElementById("report-done").value,
+        notdone: document.getElementById("report-notdone").value,
+        blockers: document.getElementById("report-blockers").value,
+        insights: document.getElementById("report-insights").value,
+        next: document.getElementById("report-next").value
+      });
     });
 
     tg.ready();
