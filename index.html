@@ -10,12 +10,17 @@
       padding: 20px;
       background: #f9f9f9;
     }
-    input, textarea, button {
+    h2 {
+      margin-bottom: 15px;
+    }
+    textarea, button {
       display: block;
       width: 100%;
       margin-bottom: 15px;
       padding: 10px;
       font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     button {
       background: #4CAF50;
@@ -42,11 +47,12 @@
     document.getElementById("planForm").addEventListener("submit", function(e) {
       e.preventDefault();
       const data = {
+        form: "План недели",   // важно для Google Script
         plan: document.getElementById("plan").value,
         important: document.getElementById("important").value
       };
-      // Отправляем данные обратно в бота
-      tg.sendData(JSON.stringify(data));
+      tg.sendData(JSON.stringify(data)); // отправка в бота
+      tg.close(); // закрыть WebApp после отправки
     });
 
     tg.ready();
