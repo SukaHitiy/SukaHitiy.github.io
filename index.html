@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Форма планёрки</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ адаптация -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: "Segoe UI", Roboto, sans-serif;
@@ -47,14 +47,13 @@
       font-weight: 500;
       border-bottom: 3px solid transparent;
       transition: all 0.3s ease;
-      white-space: nowrap;
     }
     nav button.active {
       border-bottom: 3px solid #4CAF50;
       color: #4CAF50;
     }
     .container {
-      padding: 120px 15px 20px; /* ✅ учёт фиксированного header + nav */
+      padding: 120px 15px 20px;
       max-width: 600px;
       margin: auto;
     }
@@ -145,6 +144,11 @@
 
   <script>
     const tg = window.Telegram.WebApp;
+
+    // Расширяем WebApp на весь экран
+    tg.expand();
+    tg.setHeaderColor("#4CAF50");
+    tg.setBackgroundColor("#f4f6f9");
 
     // Переключение вкладок
     const tabs = {
