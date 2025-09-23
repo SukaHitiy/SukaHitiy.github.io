@@ -82,10 +82,11 @@ function renderRubrics(data, grid) {
   for (const topKey in data) {
     const top = data[topKey];
 
-    const card = document.createElement('section');
+    const card = document.createElement('details');   // ⬅ вместо <section>
     card.className = 'card';
+    card.open = false; // чтобы изначально был закрыт
 
-    const header = document.createElement('header');
+    const header = document.createElement('summary'); // ⬅ вместо <header>
     header.className = 'card-head';
 
     const topLabel = document.createElement('label');
@@ -105,6 +106,7 @@ function renderRubrics(data, grid) {
 
     const body = document.createElement('div');
     body.className = 'card-body';
+
 
     if (Array.isArray(top.cats)) {
       top.cats.forEach(cat => {
@@ -282,27 +284,18 @@ function collectSelection() {
 }
 
 /* ========= Отправка боту (простой POST к Bot API) ========= */
-async function sendToTelegram(selected) {
-  // ⚠️ Лучше проксировать через свой бэкенд, чтобы токен не светился в браузере.
-  const TOKEN = '<YOUR_BOT_TOKEN>';
-  const CHAT_ID = '<YOUR_CHAT_ID>';
+/* ========= Отправка данных в бота ========= */
+function sendToTelegram(selected) {
+  // Передаем JSON с выбранными категориями
+  const text = {
+    action: "rubrics_selected",
+    payload: selected
+  };
 
-  const text = 'Выбранные рубрики:\n' + selected.map(t =>
-    `• ${t.name} (${t.id})\n` + t.cats.map(c =>
-      `   - ${c.name} (${c.id})` + (c.attrs.length
-        ? `\n${c.attrs.map(a => `      · ${a.title} (${a.id})`).join('\n')}`
-        : '')
-    ).join('\n')
-  ).join('\n');
-
-  // Сообщение может быть длинным — при необходимости режь на части
-  const res = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: CHAT_ID, text })
-  });
-  return res.ok;
+  Telegram.WebApp.sendData(JSON.stringify(text));
+  return true; // чтобы код выше понимал что "отправка ок"
 }
+
 
 /* ========= Инициализация ========= */
 renderRubrics(rubrics, document.getElementById('rubrics-grid'));
