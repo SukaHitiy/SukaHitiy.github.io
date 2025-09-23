@@ -241,44 +241,17 @@ function updateTopState(cardEl) {
 }
 
 /* ========= Сбор выбранного ========= */
+/* ========= Сбор выбранного (только attrs) ========= */
 function collectSelection() {
-  // собираем по структуре: top -> cats -> attrs
   const result = [];
 
-  document.querySelectorAll('.card').forEach(card => {
-    const topCb = card.querySelector('.top-checkbox');
-    const topName = card.querySelector('.card-head .check span')?.textContent?.trim() || '';
-    const top = {
-      id: Number(topCb.value),
-      name: topName,
-      cats: []
-    };
-
-    card.querySelectorAll('.cat').forEach(cat => {
-      const catCb = cat.querySelector('.cat-checkbox');
-      const catName = cat.querySelector('summary .check span')?.textContent?.trim() || '';
-      // включаем подкатегорию, если она отмечена ИЛИ если в ней отмечены атрибуты
-      const attrsChecked = cat.querySelectorAll('.attr-checkbox:checked');
-      if (catCb.checked || attrsChecked.length > 0) {
-        const catObj = {
-          id: isNaN(Number(catCb.value)) ? catCb.value : Number(catCb.value),
-          name: catName,
-          attrs: []
-        };
-        attrsChecked.forEach(a => {
-          const label = a.parentElement.querySelector('span');
-          catObj.attrs.push({
-            id: isNaN(Number(a.value)) ? a.value : Number(a.value),
-            title: label ? label.textContent.trim() : String(a.value)
-          });
-        });
-        top.cats.push(catObj);
-      }
+  // берём только отмеченные чекбоксы атрибутов
+  document.querySelectorAll('.attr-checkbox:checked').forEach(aCb => {
+    const label = aCb.parentElement.querySelector('span');
+    result.push({
+      id: isNaN(Number(aCb.value)) ? aCb.value : Number(aCb.value),
+      title: label ? label.textContent.trim() : String(aCb.value)
     });
-
-    if (topCb.checked || top.cats.length > 0) {
-      result.push(top);
-    }
   });
 
   return result;
