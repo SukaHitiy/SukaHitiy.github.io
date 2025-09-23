@@ -1,213 +1,328 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Форма планёрки</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #000; /* Чёрный фон */
-      color: #fff;
-    }
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: #FF6600; /* Оранжевый */
-      color: #fff;
-      text-align: center;
-      padding: 14px;
-      font-size: 18px;
-      font-weight: bold;
-      z-index: 1000;
-    }
-    nav {
-      position: fixed;
-      top: 52px;
-      left: 0;
-      right: 0;
-      display: flex;
-      background: #111;
-      border-bottom: 2px solid #FF6600;
-      z-index: 999;
-    }
-    nav button {
-      flex: 1;
-      padding: 12px 6px;
-      border: none;
-      background: #111;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      color: #aaa;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s ease;
-    }
-    nav button.active {
-      border-bottom: 3px solid #FF6600;
-      color: #FF6600;
-    }
-    .container {
-      padding: 120px 15px 20px;
-      max-width: 600px;
-      margin: auto;
-    }
-    form {
-      display: none;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    form.active {
-      display: block;
-    }
-    h3 {
-      font-size: 18px;
-      margin-bottom: 12px;
-      color: #FF6600;
-    }
-    textarea {
-      width: 100%;
-      min-height: 70px;
-      margin-bottom: 12px;
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #FF6600;
-      border-radius: 8px;
-      resize: vertical;
-      background: #111;
-      color: #fff;
-      box-sizing: border-box;
-    }
-    textarea::placeholder {
-      color: #aaa;
-    }
-    button.submit {
-      width: 100%;
-      padding: 16px;
-      font-size: 16px;
-      background: #FF6600;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button.submit:hover {
-      background: #e65c00;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Рубрики и подкатегории</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>Форма планёрки</header>
 
-  <nav>
-    <button id="tab-week" class="active">План</button>
-    <button id="tab-day">Сводка</button>
-    <button id="tab-report">Отчёт</button>
-  </nav>
+<header class="page-head">
+  <h1>Выбор рубрик Kwork</h1>
+  <p class="muted">Отметь категории, подкатегории и атрибуты. Выбор категории включает все её подкатегории, а выбор подкатегории — все её атрибуты.</p>
+</header>
 
-  <div class="container">
-    <!-- 📅 План недели -->
-    <form id="form-week" class="active">
-      <h3>План на неделю</h3>
-      <textarea id="week-plan" placeholder="1–3 главные задачи"></textarea>
-      <textarea id="week-important" placeholder="Что самое важное"></textarea>
-      <button type="submit" class="submit">Отправить</button>
-    </form>
+<main class="container">
+  <div id="rubrics-grid" class="grid"></div>
+</main>
 
-    <!-- 📋 Сводка дня -->
-    <form id="form-day">
-      <h3>Сводка дня</h3>
-      <textarea id="day-did" placeholder="Что сделал вчера"></textarea>
-      <textarea id="day-didnt" placeholder="Что не сделал и почему"></textarea>
-      <textarea id="day-blockers" placeholder="Какие препятствия"></textarea>
-      <textarea id="day-insights" placeholder="Какие инсайты"></textarea>
-      <textarea id="day-today" placeholder="План на сегодня (1–2 задачи)"></textarea>
-      <button type="submit" class="submit">Отправить</button>
-    </form>
+<footer class="footer">
+  <button id="doneBtn" class="btn primary">✅ Готово</button>
+  <div id="result" class="result"></div>
+</footer>
 
-    <!-- 📊 Отчёт недели -->
-    <form id="form-report">
-      <h3>Отчёт недели</h3>
-      <textarea id="report-planned" placeholder="Какой был план"></textarea>
-      <textarea id="report-done" placeholder="Что сделал"></textarea>
-      <textarea id="report-notdone" placeholder="Что не сделал и почему"></textarea>
-      <textarea id="report-blockers" placeholder="Какие препятствия"></textarea>
-      <textarea id="report-insights" placeholder="Какие главные инсайты"></textarea>
-      <textarea id="report-next" placeholder="План на следующую неделю"></textarea>
-      <button type="submit" class="submit">Отправить</button>
-    </form>
-  </div>
+<script>
+/* ========= Пример данных (можешь подставить свой JSON) ========= */
+const rubrics = {
+  "5": {
+    "id": 5,
+    "CATID": 5,
+    "name": "Тексты и переводы",
+    "cats": [
+      {
+        "id": "303",
+        "CATID": "303",
+        "name": "ИИ-тексты",
+        "attributes": {
+          "4178791": { "id": 4178791, "title": "ИИ-генерация статей" },
+          "4178794": { "id": 4178794, "title": "ИИ-обработка текстов" }
+        }
+      },
+      {
+        "id": "304",
+        "CATID": "304",
+        "name": "Копирайтинг",
+        "attributes": {
+          "4178801": { "id": 4178801, "title": "Статьи для блогов" },
+          "4178802": { "id": 4178802, "title": "SEO-тексты" }
+        }
+      }
+    ]
+  },
+  "11": {
+    "id": 11,
+    "CATID": 11,
+    "name": "Разработка и IT",
+    "cats": [
+      {
+        "id": "79",
+        "CATID": "79",
+        "name": "Верстка",
+        "attributes": {
+          "224": { "id": 224, "title": "Верстка по макету" },
+          "226": { "id": 226, "title": "Доработка и адаптация" }
+        }
+      },
+      {
+        "id": "80",
+        "CATID": "80",
+        "name": "Десктоп программирование",
+        "attributes": {
+          "975": { "id": 975, "title": "Программы на заказ" },
+          "976": { "id": 976, "title": "Макросы для Office" }
+        }
+      }
+    ]
+  }
+};
 
-  <script>
-    const tg = window.Telegram.WebApp;
+/* ========= Рендер ========= */
+function renderRubrics(data, grid) {
+  for (const topKey in data) {
+    const top = data[topKey];
 
-    tg.expand();
-    tg.setHeaderColor("#FF6600");
-    tg.setBackgroundColor("#000");
+    const card = document.createElement('section');
+    card.className = 'card';
 
-    const tabs = {
-      "tab-week": "form-week",
-      "tab-day": "form-day",
-      "tab-report": "form-report"
-    };
+    const header = document.createElement('header');
+    header.className = 'card-head';
 
-    Object.keys(tabs).forEach(tabId => {
-      document.getElementById(tabId).addEventListener("click", () => {
-        document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
-        document.getElementById(tabId).classList.add("active");
+    const topLabel = document.createElement('label');
+    topLabel.className = 'check';
+    const topCb = document.createElement('input');
+    topCb.type = 'checkbox';
+    topCb.className = 'top-checkbox';
+    topCb.value = top.id;
+    topCb.dataset.topId = String(top.id);
+    const topText = document.createElement('span');
+    topText.textContent = top.name;
 
-        document.querySelectorAll("form").forEach(f => f.classList.remove("active"));
-        document.getElementById(tabs[tabId]).classList.add("active");
+    topLabel.appendChild(topCb);
+    topLabel.appendChild(topText);
+    header.appendChild(topLabel);
+    card.appendChild(header);
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+
+    if (Array.isArray(top.cats)) {
+      top.cats.forEach(cat => {
+        const details = document.createElement('details');
+        details.className = 'cat';
+        details.open = false;
+
+        const sum = document.createElement('summary');
+
+        const catLabel = document.createElement('label');
+        catLabel.className = 'check';
+        const catCb = document.createElement('input');
+        catCb.type = 'checkbox';
+        catCb.className = 'cat-checkbox';
+        catCb.value = cat.id;
+        catCb.dataset.topId = String(top.id);
+        catCb.dataset.catId = String(cat.id);
+        const catText = document.createElement('span');
+        catText.textContent = cat.name;
+
+        catLabel.appendChild(catCb);
+        catLabel.appendChild(catText);
+        sum.appendChild(catLabel);
+        details.appendChild(sum);
+
+        const attrsWrap = document.createElement('div');
+        attrsWrap.className = 'attrs';
+
+        // атрибуты могут быть объектом или массивом — нормализуем
+        const attrs = Array.isArray(cat.attributes)
+          ? cat.attributes
+          : (cat.attributes ? Object.values(cat.attributes) : []);
+
+        attrs.forEach(a => {
+          const aLabel = document.createElement('label');
+          aLabel.className = 'check';
+          const aCb = document.createElement('input');
+          aCb.type = 'checkbox';
+          aCb.className = 'attr-checkbox';
+          aCb.value = a.id;
+          aCb.dataset.topId = String(top.id);
+          aCb.dataset.catId = String(cat.id);
+          aCb.dataset.attrId = String(a.id);
+          const aText = document.createElement('span');
+          aText.textContent = a.title;
+
+          aLabel.appendChild(aCb);
+          aLabel.appendChild(aText);
+          attrsWrap.appendChild(aLabel);
+
+          // изменение атрибута => обновить подкатегорию и топ
+          aCb.addEventListener('change', () => {
+            updateCatState(details);
+            updateTopState(card);
+          });
+        });
+
+        details.appendChild(attrsWrap);
+        body.appendChild(details);
+
+        // изменение подкатегории => выбрать/снять все её атрибуты
+        catCb.addEventListener('change', () => {
+          setChildrenChecked(attrsWrap.querySelectorAll('.attr-checkbox'), catCb.checked);
+          updateCatState(details);   // выставит indeterminate=false если все переключили одинаково
+          updateTopState(card);
+        });
       });
-    });
-
-    function sendForm(formName, fields) {
-      const data = { form: formName, ...fields };
-      tg.sendData(JSON.stringify(data));
-      tg.close();
     }
 
-    document.getElementById("form-week").addEventListener("submit", e => {
-      e.preventDefault();
-      sendForm("План недели", {
-        plan: document.getElementById("week-plan").value,
-        important: document.getElementById("week-important").value
+    card.appendChild(body);
+
+    // изменение топ-категории => выбрать/снять все подкатегории и их атрибуты
+    topCb.addEventListener('change', () => {
+      const catCbs = card.querySelectorAll('.cat-checkbox');
+      const attrCbs = card.querySelectorAll('.attr-checkbox');
+      setChildrenChecked(catCbs, topCb.checked);
+      setChildrenChecked(attrCbs, topCb.checked);
+      // сбрасываем неопределённость, раз всё синхронно
+      topCb.indeterminate = false;
+      // и у каждой подкатегории тоже:
+      card.querySelectorAll('.cat').forEach(catDetails => {
+        const catBox = catDetails.querySelector('.cat-checkbox');
+        if (catBox) catBox.indeterminate = false;
       });
     });
 
-    document.getElementById("form-day").addEventListener("submit", e => {
-      e.preventDefault();
-      sendForm("Сводка дня", {
-        did: document.getElementById("day-did").value,
-        didnt: document.getElementById("day-didnt").value,
-        blockers: document.getElementById("day-blockers").value,
-        insights: document.getElementById("day-insights").value,
-        today: document.getElementById("day-today").value
-      });
+    grid.appendChild(card);
+  }
+}
+
+/* ========= Утилиты состояний ========= */
+function setChildrenChecked(nodeList, checked) {
+  nodeList.forEach(cb => { cb.checked = checked; });
+}
+
+function updateCatState(catDetailsEl) {
+  const catCb = catDetailsEl.querySelector('.cat-checkbox');
+  const attrs = catDetailsEl.querySelectorAll('.attr-checkbox');
+  const total = attrs.length;
+  const checked = catDetailsEl.querySelectorAll('.attr-checkbox:checked').length;
+
+  if (total === 0) {
+    // у подкатегории нет атрибутов — состояние управляется напрямую пользователем
+    return;
+  }
+
+  catCb.checked = (checked === total);
+  catCb.indeterminate = (checked > 0 && checked < total);
+}
+
+function updateTopState(cardEl) {
+  const topCb = cardEl.querySelector('.top-checkbox');
+  const catBoxes = cardEl.querySelectorAll('.cat-checkbox');
+  const totalCats = catBoxes.length;
+
+  if (totalCats === 0) {
+    topCb.indeterminate = false;
+    return;
+  }
+
+  let checkedCats = 0;
+  let hasIndeterminateChild = false;
+
+  catBoxes.forEach(cb => {
+    if (cb.checked) checkedCats++;
+    if (cb.indeterminate) hasIndeterminateChild = true;
+  });
+
+  topCb.checked = (checkedCats === totalCats);
+  topCb.indeterminate = (!topCb.checked) && (checkedCats > 0 || hasIndeterminateChild);
+}
+
+/* ========= Сбор выбранного ========= */
+function collectSelection() {
+  // собираем по структуре: top -> cats -> attrs
+  const result = [];
+
+  document.querySelectorAll('.card').forEach(card => {
+    const topCb = card.querySelector('.top-checkbox');
+    const topName = card.querySelector('.card-head .check span')?.textContent?.trim() || '';
+    const top = {
+      id: Number(topCb.value),
+      name: topName,
+      cats: []
+    };
+
+    card.querySelectorAll('.cat').forEach(cat => {
+      const catCb = cat.querySelector('.cat-checkbox');
+      const catName = cat.querySelector('summary .check span')?.textContent?.trim() || '';
+      // включаем подкатегорию, если она отмечена ИЛИ если в ней отмечены атрибуты
+      const attrsChecked = cat.querySelectorAll('.attr-checkbox:checked');
+      if (catCb.checked || attrsChecked.length > 0) {
+        const catObj = {
+          id: isNaN(Number(catCb.value)) ? catCb.value : Number(catCb.value),
+          name: catName,
+          attrs: []
+        };
+        attrsChecked.forEach(a => {
+          const label = a.parentElement.querySelector('span');
+          catObj.attrs.push({
+            id: isNaN(Number(a.value)) ? a.value : Number(a.value),
+            title: label ? label.textContent.trim() : String(a.value)
+          });
+        });
+        top.cats.push(catObj);
+      }
     });
 
-    document.getElementById("form-report").addEventListener("submit", e => {
-      e.preventDefault();
-      sendForm("Отчёт недели", {
-        planned: document.getElementById("report-planned").value,
-        done: document.getElementById("report-done").value,
-        notdone: document.getElementById("report-notdone").value,
-        blockers: document.getElementById("report-blockers").value,
-        insights: document.getElementById("report-insights").value,
-        next: document.getElementById("report-next").value
-      });
-    });
+    if (topCb.checked || top.cats.length > 0) {
+      result.push(top);
+    }
+  });
 
-    tg.ready();
-  </script>
+  return result;
+}
+
+/* ========= Отправка боту (простой POST к Bot API) ========= */
+async function sendToTelegram(selected) {
+  // ⚠️ Лучше проксировать через свой бэкенд, чтобы токен не светился в браузере.
+  const TOKEN = '<YOUR_BOT_TOKEN>';
+  const CHAT_ID = '<YOUR_CHAT_ID>';
+
+  const text = 'Выбранные рубрики:\n' + selected.map(t =>
+    `• ${t.name} (${t.id})\n` + t.cats.map(c =>
+      `   - ${c.name} (${c.id})` + (c.attrs.length
+        ? `\n${c.attrs.map(a => `      · ${a.title} (${a.id})`).join('\n')}`
+        : '')
+    ).join('\n')
+  ).join('\n');
+
+  // Сообщение может быть длинным — при необходимости режь на части
+  const res = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: CHAT_ID, text })
+  });
+  return res.ok;
+}
+
+/* ========= Инициализация ========= */
+renderRubrics(rubrics, document.getElementById('rubrics-grid'));
+
+/* ========= Кнопка "Готово" ========= */
+document.getElementById('doneBtn').addEventListener('click', async () => {
+  const selected = collectSelection();
+  const out = document.getElementById('result');
+  out.textContent = selected.length ? 'Отправляю выбранные…' : 'Ничего не выбрано.';
+
+  try {
+    const ok = await sendToTelegram(selected);
+    out.textContent = ok ? '✅ Отправлено боту.' : '❌ Не удалось отправить боту.';
+    // для отладки:
+    console.log('SELECTED:', selected);
+  } catch (e) {
+    out.textContent = '❌ Ошибка отправки.';
+  }
+});
+</script>
+
 </body>
 </html>
