@@ -286,14 +286,18 @@ function collectSelection() {
 /* ========= Отправка боту (простой POST к Bot API) ========= */
 /* ========= Отправка данных в бота ========= */
 function sendToTelegram(selected) {
-  // Передаем JSON с выбранными категориями
   const text = {
     action: "rubrics_selected",
     payload: selected
   };
 
-  Telegram.WebApp.sendData(JSON.stringify(text));
-  return true; // чтобы код выше понимал что "отправка ок"
+  if (window.Telegram && Telegram.WebApp) {
+    Telegram.WebApp.sendData(JSON.stringify(text));
+    return true;
+  } else {
+    console.log("DEBUG: WebApp API недоступен, покажу данные в консоли:", text);
+    return false;
+  }
 }
 
 
