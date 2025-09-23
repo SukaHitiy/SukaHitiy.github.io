@@ -96,8 +96,25 @@ body{
   padding:12px 12px;
   background: #141414;
   user-select:none;
+  position: relative;
+  padding-right: 28px; /* место для стрелки */
 }
 .cat > summary::-webkit-details-marker{display:none}
+
+.cat > summary::after {
+  content: "▶"; /* стрелка вправо */
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform 0.2s ease;
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.cat[open] > summary::after {
+  transform: translateY(-50%) rotate(90deg);
+}
 
 .attrs{
   padding: 10px 12px 12px;
@@ -130,6 +147,29 @@ body{
 .check span{
   line-height:1.2;
 }
+
+.card > summary {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+  padding-right: 28px;
+}
+.card > summary::-webkit-details-marker { display: none; }
+
+.card > summary::after {
+  content: "▶";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  transition: transform .2s ease;
+  color: var(--accent);
+}
+.card[open] > summary::after {
+  transform: translateY(-50%) rotate(90deg);
+}
+
+
 
 /* кнопки */
 .btn{
